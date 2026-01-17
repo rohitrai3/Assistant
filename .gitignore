@@ -1,2 +1,13 @@
+/Android/*.iml
+/Android/.gradle
+/Android/local.properties
+/Android/.idea
+/Android/.DS_Store
+/Android/build
+/Android/captures
+/Android/.externalNativeBuild
+/Android/.cxx
+/Android/local.properties
+/Android/app/release
 /Linux/Assistant/build
-Linux/Assistant/.qtcreator
+/Linux/Assistant/.qtcreator
