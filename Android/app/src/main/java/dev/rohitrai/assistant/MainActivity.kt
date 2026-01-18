@@ -1,47 +1,34 @@
 package dev.rohitrai.assistant
 
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import dev.rohitrai.assistant.ui.theme.AssistantTheme
+import android.widget.TextView
+import dev.rohitrai.assistant.databinding.ActivityMainBinding
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            AssistantTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Example of a call to a native method
+        binding.sampleText.text = stringFromJNI()
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    /**
+     * A native method that is implemented by the 'assistant' native library,
+     * which is packaged with this application.
+     */
+    external fun stringFromJNI(): String
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AssistantTheme {
-        Greeting("Android")
+    companion object {
+        // Used to load the 'assistant' library on application startup.
+        init {
+            System.loadLibrary("assistant")
+        }
     }
 }

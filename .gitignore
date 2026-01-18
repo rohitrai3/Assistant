@@ -6,7 +6,7 @@
 /Android/build
 /Android/captures
 /Android/.externalNativeBuild
-/Android/.cxx
+**/.cxx
 /Android/local.properties
 /Android/app/release
 /Linux/Assistant/build
