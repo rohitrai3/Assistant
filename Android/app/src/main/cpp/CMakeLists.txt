@@ -26,7 +26,26 @@ project("assistant")
 # used in the AndroidManifest.xml file.
 add_library(${CMAKE_PROJECT_NAME} SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
-        native-lib.cpp)
+        jni.c
+        whisper.cpp/src/whisper.cpp
+        whisper.cpp/ggml/src/ggml.c
+        whisper.cpp/ggml/src/ggml.cpp
+        whisper.cpp/ggml/src/ggml-threading.cpp
+        whisper.cpp/ggml/src/ggml-backend-reg.cpp
+        whisper.cpp/ggml/src/ggml-backend.cpp
+        whisper.cpp/ggml/src/ggml-alloc.c
+        whisper.cpp/ggml/src/ggml-quants.c
+        whisper.cpp/ggml/src/ggml-cpu/ggml-cpu.cpp
+        whisper.cpp/ggml/src/ggml-cpu/ggml-cpu.c
+        whisper.cpp/ggml/src/ggml-cpu/traits.cpp
+        whisper.cpp/ggml/src/ggml-cpu/vec.cpp
+        whisper.cpp/ggml/src/ggml-cpu/ops.cpp
+        whisper.cpp/ggml/src/ggml-cpu/binary-ops.cpp
+        whisper.cpp/ggml/src/ggml-cpu/unary-ops.cpp
+        whisper.cpp/ggml/src/ggml-cpu/quants.h
+        whisper.cpp/ggml/src/ggml-cpu/quants.c
+        whisper.cpp/ggml/src/ggml-cpu/arch/arm/quants.c
+)
 
 find_package(oboe REQUIRED CONFIG)
 
@@ -37,5 +56,11 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         # List libraries link to the target library
         android
         log
-        oboe::oboe
+)
+
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+        WHISPER_VERSION="${PROJECT_VERSION}"
+        GGML_VERSION="${GGML_INSTALL_VERSION}"
+        GGML_COMMIT="${GGML_BUILD_COMMIT}"
+        ${target_name} PUBLIC GGML_USE_CPU
 )
