@@ -3,19 +3,24 @@ package dev.rohitrai.assistant
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.material3.MaterialTheme
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import dev.rohitrai.assistant.ui.screen.MainScreen
+import dev.rohitrai.assistant.ui.theme.AssistantTheme
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainScreenViewModel by viewModels { MainScreenViewModel.factory() }
-    private val llamaViewModel: LlamaMainScreenViewModel by viewModels { LlamaMainScreenViewModel.factory() }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        enableEdgeToEdge()
         setContent {
-            MaterialTheme {
-                LlamaMainScreen(llamaViewModel)
+            AssistantTheme {
+                MainScreen()
             }
         }
     }
