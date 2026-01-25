@@ -1,6 +1,5 @@
 package dev.rohitrai.assistant.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,10 +34,8 @@ fun MainScreen(viewModel: MainScreenViewModel) {
     viewModel.status.value = stringResource(R.string.status_application_started)
 
     fun sendPrompt() {
-        Log.i("HomeScreen", "Pinging...")
         viewModel.status.value = "Pinging..."
         viewModel.ping()
-        Log.i("HomeScreen", "Ping response: ${viewModel.pingResponse}")
         viewModel.status.value = "Ping response: ${viewModel.pingResponse}"
     }
 

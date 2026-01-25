@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0"
 }
 
 android {
@@ -48,7 +49,11 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     // Retrofit: https://github.com/square/retrofit
     implementation(libs.retrofit)
-    implementation(libs.converter.scalars)
+    // Retrofit with Kotlin serialization Converter
+    implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.okhttp)
+    // JSON
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
