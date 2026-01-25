@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Assistant</string>
+    <string name="prompt_input_error_message">Please enter a prompt.</string>
+    <string name="prompt_input_label">Please enter a prompt.</string>
 </resources>

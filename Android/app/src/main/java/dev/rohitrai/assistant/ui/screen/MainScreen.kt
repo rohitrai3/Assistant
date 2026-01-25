@@ -1,23 +1,58 @@
 package dev.rohitrai.assistant.ui.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import dev.rohitrai.assistant.R
+import dev.rohitrai.assistant.ui.component.TextInput
 
 @Composable
 fun MainScreen() {
-    MainView("Assistant")
+    val promptInputErrorMessage = stringResource(R.string.prompt_input_error_message)
+    val isError = remember { mutableStateOf(false) }
+    val promptInputLabel = stringResource(R.string.prompt_input_label)
+    val promptInputState = rememberTextFieldState()
+    ScreenContent(
+        isError = isError,
+        promptInputErrorMessage = promptInputErrorMessage,
+        promptInputLabel = promptInputLabel,
+        promptInputState = promptInputState
+    )
 }
 
 @Composable
-private fun MainView(name: String) {
+private fun ScreenContent(
+    isError: MutableState<Boolean>,
+    promptInputLabel: String,
+    promptInputErrorMessage: String,
+    promptInputState: TextFieldState
+) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Column(Modifier.padding(innerPadding)) {
-            Text("Hello $name!")
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            TextInput(
+                errorMessage = promptInputErrorMessage,
+                isError = isError,
+                label = promptInputLabel,
+                state = promptInputState
+            )
         }
     }
 }
