@@ -1,7 +1,6 @@
 package dev.rohitrai.assistant.ui.component
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -27,6 +26,7 @@ fun TextInput(
     errorMessage: String,
     isError: MutableState<Boolean>,
     label: String,
+    modifier: Modifier = Modifier,
     state: TextFieldState
 ) {
     BasicTextField(
@@ -40,13 +40,12 @@ fun TextInput(
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         lineLimits = TextFieldLineLimits.SingleLine,
-        modifier = Modifier
+        modifier = modifier
             .border(
                 color = if (isError.value) Red else Gray,
                 shape = RoundedCornerShape(16.dp),
                 width = 1.dp
             )
-            .fillMaxWidth()
             .padding(16.dp),
         state = state,
         textStyle = TextStyle(
