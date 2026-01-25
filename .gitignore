@@ -9,5 +9,6 @@
 **/.cxx
 /Android/local.properties
 /Android/app/release
+**.crt
 /Linux/Assistant/build
 /Linux/Assistant/.qtcreator

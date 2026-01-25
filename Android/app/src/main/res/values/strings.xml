@@ -3,4 +3,6 @@
     <string name="prompt_input_error_message">Please enter a prompt.</string>
     <string name="prompt_input_label">Please enter a prompt.</string>
     <string name="send_button_description">Send prompt button</string>
+    <string name="status_label">Status</string>
+    <string name="status_application_started">Application started</string>
 </resources>
