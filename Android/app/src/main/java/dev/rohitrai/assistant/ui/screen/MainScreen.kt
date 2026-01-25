@@ -34,9 +34,7 @@ fun MainScreen(viewModel: MainScreenViewModel) {
     viewModel.status.value = stringResource(R.string.status_application_started)
 
     fun sendPrompt() {
-        viewModel.status.value = "Pinging..."
-        viewModel.ping()
-        viewModel.status.value = "Ping response: ${viewModel.pingResponse}"
+        viewModel.send(promptInputState.text.toString())
     }
 
     ScreenContent(
