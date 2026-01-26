@@ -1,6 +1,7 @@
 package dev.rohitrai.assistant.data
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
@@ -8,5 +9,7 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class Choice(
-    val message: Message
+    val delta: Message,
+    @SerialName(value = "finish_reason")
+    val finishReason: String?
 )

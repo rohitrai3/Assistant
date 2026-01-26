@@ -1,23 +1,30 @@
 package dev.rohitrai.assistant.ui.screen
 
+import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.rohitrai.assistant.data.Message
 import dev.rohitrai.assistant.data.Request
+import dev.rohitrai.assistant.data.Response
 import dev.rohitrai.assistant.network.AssistantApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 
-class MainScreenViewModel : ViewModel() {
+class MainScreenViewModel(application: Application) : ViewModel() {
     var pingResponse by mutableStateOf("")
         private set
     val status = mutableStateOf("")
-    val messages = mutableListOf<Message>()
+    val messages = mutableStateListOf<Message>()
 
     init {
         ping()
@@ -31,7 +38,11 @@ class MainScreenViewModel : ViewModel() {
                 pingResponse = response.status
                 status.value = "Ping complete."
             } catch (e: Exception) {
-                Log.e("MainScreenViewModel", "Exception occurred while calling ping: ", e)
+                Log.e(
+                    "MainScreenViewModel",
+                    "Exception occurred while calling ping: ",
+                    e
+                )
                 status.value = "Error calling Ping."
             }
         }
@@ -42,12 +53,32 @@ class MainScreenViewModel : ViewModel() {
             try {
                 status.value = "Sending..."
                 messages.add(Message(message, "user"))
-                val request = Request(messages)
-                val reply = AssistantApi.retrofitService.send(request)
-                status.value = "Send complete."
-                status.value = "Reply: ${reply.choices[0].message.content}"
+                val response = withContext(Dispatchers.IO) {
+                    AssistantApi.retrofitService.send(Request(messages, true))
+                }
+                status.value = "Sent."
+                status.value = "Thinking..."
+                val assistantMessage = Message("", "assistant")
+                messages.add(assistantMessage)
+                response.charStream().forEachLine { line ->
+                    if (line.startsWith("data: ")) {
+                        if (line != "data: [DONE]") {
+                            val data = Json.decodeFromString<Response>(
+                                line.substring(5)
+                            )
+                            if (data.choices[0].delta.content != null) {
+                                assistantMessage.content += data.choices[0].delta.content
+                            }
+                        }
+                    }
+                 }
+                status.value = "Received."
             } catch (e: Exception) {
-                Log.e("MainScreenViewModel", "Exception occurred while calling send: ", e)
+                Log.e(
+                    "MainScreenViewModel",
+                    "Exception occurred while calling send: ",
+                    e
+                )
                 status.value = "Error calling send."
             }
         }
@@ -56,7 +87,9 @@ class MainScreenViewModel : ViewModel() {
     companion object {
         fun factory() = viewModelFactory {
             initializer {
-                MainScreenViewModel()
+                val application =
+                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
+                MainScreenViewModel(application)
             }
         }
     }

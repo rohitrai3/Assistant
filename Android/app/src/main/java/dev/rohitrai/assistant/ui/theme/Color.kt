@@ -3,6 +3,7 @@ package dev.rohitrai.assistant.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val Black = Color(0xFF000000)
+val DarkGray = Color(0xFF444444)
 val Gray = Color(0xFF888888)
 val LightGray = Color(0xFF5F5F5F)
 val LightRed = Color(0xFFB20000)

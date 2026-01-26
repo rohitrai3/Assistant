@@ -3,13 +3,13 @@ package dev.rohitrai.assistant.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.rohitrai.assistant.R
+import dev.rohitrai.assistant.data.Message
+import dev.rohitrai.assistant.ui.component.MessageBox
 import dev.rohitrai.assistant.ui.component.SendButton
 import dev.rohitrai.assistant.ui.component.TextInput
 
@@ -35,6 +37,7 @@ fun MainScreen(viewModel: MainScreenViewModel) {
 
     fun sendPrompt() {
         viewModel.send(promptInputState.text.toString())
+        promptInputState.clearText()
     }
 
     ScreenContent(
@@ -43,7 +46,8 @@ fun MainScreen(viewModel: MainScreenViewModel) {
         promptInputErrorMessage = promptInputErrorMessage,
         promptInputLabel = promptInputLabel,
         promptInputState = promptInputState,
-        status = viewModel.status
+        status = viewModel.status,
+        messages = viewModel.messages
     )
 }
 
@@ -54,7 +58,8 @@ private fun ScreenContent(
     promptInputLabel: String,
     promptInputErrorMessage: String,
     promptInputState: TextFieldState,
-    status: MutableState<String>
+    status: MutableState<String>,
+    messages: List<Message>
 ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
@@ -66,7 +71,7 @@ private fun ScreenContent(
             verticalArrangement = Arrangement.Bottom
         ) {
             Text("${stringResource(R.string.status_label)}: ${status.value}")
-            Spacer(Modifier.weight(1f))
+            MessageBox(messages, Modifier.weight(1f))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth().imePadding()
