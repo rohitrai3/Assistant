@@ -1,7 +1,7 @@
 function App() {
 
   return (
-    <div>
+    <div className="font-roboto">
       Assistant
     </div>
   );

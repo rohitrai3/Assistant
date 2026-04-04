@@ -1,2 +1,14 @@
 @import "tailwindcss";
+@font-face {
+  font-family: Roboto;
+  src: url("./assets/RobotoMono-Regular.ttf");
+}
+@theme {
+  --font-roboto: "Roboto";
+}
+
+body {
+  background-color: #000000;
+  color: #ffffff;
+}
 
