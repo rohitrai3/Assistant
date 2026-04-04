@@ -14,9 +14,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+//        setVolumeControlStream(AudioManager.STREAM_MUSIC)
         setContent {
             AssistantTheme {
-                MainScreen(viewModel)
+                MainScreen(viewModel, this)
             }
         }
     }

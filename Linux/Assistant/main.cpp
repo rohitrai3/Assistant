@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <audio.h>
 
 int main(int argc, char *argv[])
 {
