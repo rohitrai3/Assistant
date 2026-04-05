@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { getTranscription, loadModel } from "./STT.ts";
+import { getTranscription, loadModel } from "./STT";
 
 const app = express();
 const server = createServer(app);
@@ -11,7 +11,6 @@ const io = new Server(server, {
     origin: process.env.ORIGIN_URL
   }
 });
-
 
 server.listen(3000, async () => {
   await loadModel();
