@@ -14,3 +14,4 @@
 /Linux/Assistant/.qtcreator
 **/node_modules/
 **.env
+**.turbo
