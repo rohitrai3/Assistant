@@ -27,13 +27,13 @@ function App() {
 
         chunksRef.current = [];
         setIsLoading(true);
-        // await getTranscription(URL.createObjectURL(blob), setTranscription, setIsLoading);
 
         const audioData = await read_audio(URL.createObjectURL(blob), 16000);
-        socket.emit("transcribe", audioData, (res: string) => {
-          console.log("res: ", res);
+        socket.emit("transcribe", audioData);
+        socket.on("transcription", (res: string) => {
           setTranscription(res);
         });
+
         setIsLoading(false);
 
         streamRef.current?.getTracks().forEach(track => track.stop());

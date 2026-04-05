@@ -12,3 +12,5 @@
 **.crt
 /Linux/Assistant/build
 /Linux/Assistant/.qtcreator
+**/node_modules/
+**.env
