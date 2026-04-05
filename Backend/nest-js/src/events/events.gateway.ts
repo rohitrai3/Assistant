@@ -9,7 +9,7 @@ import { getTranscription } from 'src/STT';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: [process.env.ORIGIN_URL],
   },
 })
 export class EventsGateway {

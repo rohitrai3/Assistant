@@ -10,7 +10,7 @@ function App() {
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const socket = io('http://localhost:3000');
+  const socket = io(import.meta.env.VITE_BACKEND_URL);
 
   async function startRecording() {
     streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
