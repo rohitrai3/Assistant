@@ -7,7 +7,7 @@ env.allowLocalModels = true;
 env.useBrowserCache = false;
 let pipe: AutomaticSpeechRecognitionPipeline | void | null = null;
 
-if (env.backends.onnx.wasm) env.backends.onnx.wasm.wasmPaths = "/public/wasm/";
+if (env.backends.onnx.wasm) env.backends.onnx.wasm.wasmPaths = "/wasm/";
 
 export async function loadModel(setIsLoading: Dispatch<SetStateAction<boolean>>) {
   pipe = await pipeline("automatic-speech-recognition", "whisper-tiny-en", {
