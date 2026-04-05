@@ -1,15 +1,74 @@
-import { useState } from "react";
-import AudioInput from "./components/AudioInput";
-import { loadModel } from "./utils/Whisper";
-import { Spinner } from "./utils/icons";
+import { useRef, useState } from "react";
+import { MicOff, MicOn, Spinner } from "./utils/icons";
+import { io } from "socket.io-client";
+import { read_audio } from "@huggingface/transformers";
 
 function App() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  loadModel(setIsLoading);
+  const [recording, setRecording] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [transcription, setTranscription] = useState<string>("Transcription");
+  const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const socket = io('http://localhost:3000');
+
+  async function startRecording() {
+    streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType: "audio/webm" });
+    mediaRecorderRef.current = mediaRecorder;
+
+    mediaRecorder.addEventListener("dataavailable", async (event) => {
+      if (event.data.size > 0) {
+        chunksRef.current.push(event.data);
+      }
+
+      if (mediaRecorder.state === "inactive") {
+        let blob = new Blob(chunksRef.current, { type: "audio/wav" });
+
+        chunksRef.current = [];
+        setIsLoading(true);
+        // await getTranscription(URL.createObjectURL(blob), setTranscription, setIsLoading);
+
+        const audioData = await read_audio(URL.createObjectURL(blob), 16000);
+        socket.emit("transcribe", audioData, (res: string) => {
+          console.log("res: ", res);
+          setTranscription(res);
+        });
+        setIsLoading(false);
+
+        streamRef.current?.getTracks().forEach(track => track.stop());
+      }
+    });
+
+    mediaRecorder.start();
+    setRecording(true);
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+    }
+  };
+
+
+  function onClick() {
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }
 
   return (
-    <div className="font-roboto w-dvw h-dvh flex justify-center items-center">
-      {isLoading ? <div className="animate-spin">{Spinner()}</div> : <AudioInput />}
+    <div className="font-roboto flex justify-center items-center w-dvw h-dvh">
+      {isLoading ? <div className="animate-spin">{Spinner()}</div> :
+        <div>
+          <button className="bg-gray hover:bg-purple p-2 rounded-full cursor-pointer" onClick={onClick}>
+            {recording ? MicOff() : MicOn()}
+          </button>
+          <p>{transcription}</p>
+        </div>}
     </div>
   );
 }
