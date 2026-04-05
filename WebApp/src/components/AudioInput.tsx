@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { MicOff, MicOn, Spinner } from "../utils/icons";
-import { webmFixDuration } from "../utils/BlobFix";
 import { getTranscription } from "../utils/Whisper";
 
 function AudioInput() {
@@ -31,7 +30,6 @@ function AudioInput() {
   }
 
   async function startRecording() {
-    const startTime = Date.now();
     const mimeType = getMimeType();
     streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType });
@@ -43,12 +41,7 @@ function AudioInput() {
       }
 
       if (mediaRecorder.state === "inactive") {
-        const duration = Date.now() - startTime;
         let blob = new Blob(chunksRef.current, { type: mimeType });
-
-        if (mimeType === "audio/webm") {
-          blob = await webmFixDuration(blob, duration, blob.type);
-        }
 
         chunksRef.current = [];
         setIsLoading(true);
