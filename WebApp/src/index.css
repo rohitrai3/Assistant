@@ -6,7 +6,9 @@
 @theme {
   --font-roboto: "Roboto";
   --color-gray: #4c5868;
+  --color-gray-dark: #1e2329;
   --color-purple: #662caa;
+  --color-purple-dark: #281144;
 }
 
 body {
