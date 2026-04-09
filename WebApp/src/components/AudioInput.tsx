@@ -1,11 +1,10 @@
 import { useRef, useState } from "react";
-import { MicOff, MicOn, Spinner } from "../utils/icons";
+import { MicOff, MicOn } from "../utils/icons";
 import { read_audio } from "@huggingface/transformers";
 import type { AudioInputProps } from "../utils/types";
 
-export default function AudioInput({ socket }: AudioInputProps) {
+export default function AudioInput({ isConnected, socket }: AudioInputProps) {
   const [recording, setRecording] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -24,13 +23,9 @@ export default function AudioInput({ socket }: AudioInputProps) {
         let blob = new Blob(chunksRef.current, { type: "audio/wav" });
 
         chunksRef.current = [];
-        setIsLoading(true);
 
         const audioData = await read_audio(URL.createObjectURL(blob), 16000);
         socket.emit("transcribe", audioData);
-
-
-        setIsLoading(false);
 
         streamRef.current?.getTracks().forEach(track => track.stop());
       }
@@ -57,16 +52,17 @@ export default function AudioInput({ socket }: AudioInputProps) {
   }
 
   return (
-    <div>
-      {
-        isLoading ?
-          <div className="animate-spin">{Spinner()}</div> :
-          <div className="mb-4">
-            <button className="bg-gray hover:bg-purple p-2 rounded-full cursor-pointer" onClick={onClick}>
-              {recording ? MicOff() : MicOn()}
-            </button>
-          </div>
-      }
+    <div className="mb-4">
+      <button
+        className={
+          `${isConnected ? "bg-gray cursor-pointer hover:bg-purple" : "bg-gray-dark"}
+          p-2 
+          rounded-full`}
+        disabled={!isConnected}
+        onClick={onClick}
+      >
+        {recording ? MicOff() : MicOn(isConnected ? "fill-white" : "fill-gray")}
+      </button>
     </div>
   );
 }

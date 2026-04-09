@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Socket } from "socket.io-client";
 
 export type AudioInputProps = {
+  isConnected: boolean;
   socket: Socket;
 }
 
