@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { EventsGateway } from './events.gateway';
+import McpClient from 'src/providers/MCPClient';
+import SttModel from 'src/providers/STT';
 
 @Module({
-  providers: [EventsGateway],
+  providers: [EventsGateway, McpClient, SttModel],
 })
-export class EventsModule {}
+export class EventsModule { }

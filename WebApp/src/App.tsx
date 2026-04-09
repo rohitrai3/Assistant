@@ -11,6 +11,10 @@ function App() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const socket = io(import.meta.env.VITE_BACKEND_URL);
+  socket.on("transcription", (res: string) => {
+    console.log("res: ", res);
+    setTranscription(res);
+  });
 
   async function startRecording() {
     streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -30,9 +34,7 @@ function App() {
 
         const audioData = await read_audio(URL.createObjectURL(blob), 16000);
         socket.emit("transcribe", audioData);
-        socket.on("transcription", (res: string) => {
-          setTranscription(res);
-        });
+
 
         setIsLoading(false);
 
