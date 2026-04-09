@@ -25,7 +25,7 @@ export default function AudioInput({ isConnected, socket }: AudioInputProps) {
         chunksRef.current = [];
 
         const audioData = await read_audio(URL.createObjectURL(blob), 16000);
-        socket.emit("transcribe", audioData);
+        socket.emit("conversation", audioData);
 
         streamRef.current?.getTracks().forEach(track => track.stop());
       }

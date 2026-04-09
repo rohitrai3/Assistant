@@ -1,7 +1,11 @@
-import type { ConversationViewProps } from "../utils/types";
+import type { ConversationViewProps, Message } from "../utils/types";
 import MessageView from "./MessageView";
 
-export default function ConversationView({ messages }: ConversationViewProps) {
+export default function ConversationView({ messages, setMessages, socket }: ConversationViewProps) {
+  socket.on("conversation", (res: Message) => {
+    setMessages([...messages, res]);
+  });
+
 
   return (
     <div className="w-full flex-1 flex flex-col justify-end gap-4">

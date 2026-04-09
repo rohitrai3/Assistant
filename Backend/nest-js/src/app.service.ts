@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { isModelLoaded } from './STT';
 
 @Injectable()
 export class AppService {
@@ -7,7 +6,5 @@ export class AppService {
     return 'Hello World!';
   }
 
-  getModelStatus(): string {
-    return isModelLoaded() ? 'Ready' : 'Not ready';
-  }
 }
+
