@@ -22,6 +22,7 @@ export default function ConversationView({
   const [assistantToolName, setAssistantToolName] = useState<string>("");
   const [assistantToolInput, setAssistantToolInput] = useState<string>("");
   const bottomDivRef = useRef<HTMLDivElement | null>(null);
+  const audioRef = useRef(new Audio());
 
   if (bottomDivRef.current) bottomDivRef.current.scrollIntoView();
 
@@ -75,6 +76,15 @@ export default function ConversationView({
       toolInput = toolInput + res;
     });
 
+    socket.on("speech", (res) => {
+      console.log("speech: ", res);
+      const bufferData = new Uint8Array(res);
+      const blob = new Blob([bufferData], { type: "audio/wav" });
+      const objectURL = URL.createObjectURL(blob);
+      audioRef.current.src = objectURL;
+      audioRef.current.play();
+    });
+
     return () => {
       socket.off("user.message", () => console.log("Closing user message event"));
       socket.off("assistant.thinking.start", () => console.log("Closing assistant thinking start event"));
@@ -84,6 +94,7 @@ export default function ConversationView({
       socket.off("assistant.signature", () => console.log("Closing assistant signature event"));
       socket.off("assistant.tool.start", () => console.log("Closing assistant tool start event"));
       socket.off("assistant.tool", () => console.log("Closing assistant tool event"));
+      socket.off("speech", () => console.log("Closing speech event"));
     };
   }, []);
 
@@ -105,6 +116,7 @@ export default function ConversationView({
       {assistantToolName && <AssistantToolView name={assistantToolName} input={assistantToolInput} />}
       {assistantResponse && <AssistantResponseView content={assistantResponse} />}
       <div ref={bottomDivRef} />
+      <audio className="hidden" ref={audioRef} controls />
     </div>
   );
 }

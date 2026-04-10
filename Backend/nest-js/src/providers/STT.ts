@@ -18,13 +18,6 @@ export default class SttModel {
     env.allowRemoteModels = false;
     env.allowLocalModels = true;
     env.useBrowserCache = false;
-
-    if (env.backends.onnx.wasm) {
-      env.backends.onnx.wasm.wasmPaths = join(
-        process.cwd(),
-        'src/assets/wasm/',
-      );
-    }
   }
 
   async load() {
@@ -41,7 +34,7 @@ export default class SttModel {
       },
     )
       .catch((err) => this.logger.error('Error loading model: ', err))
-      .finally(() => this.logger.log('Model loaded'));
+      .finally(() => this.logger.log('STT model loaded'));
   }
 
   async getTranscription(audio: Float32Array): Promise<string> {

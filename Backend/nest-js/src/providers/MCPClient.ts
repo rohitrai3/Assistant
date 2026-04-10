@@ -9,8 +9,9 @@ import {
 } from '../utils/types';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
+import TtsModel from './TTS';
 
 @Injectable()
 export default class McpClient {
@@ -18,6 +19,8 @@ export default class McpClient {
   private mcp: Client;
   private transport: StdioClientTransport | null = null;
   private tools: Tool[] = [];
+  @Inject()
+  private ttsModel: TtsModel;
 
   constructor() {
     this.logger.log('Initialize McpClient');
@@ -144,6 +147,7 @@ export default class McpClient {
     const stream = res.body;
     let toolName = '';
     let toolInput = '{';
+    let response = '';
 
     if (stream) {
       const reader = stream.getReader();
@@ -164,6 +168,8 @@ export default class McpClient {
 
             const chunkString = new TextDecoder().decode(value);
             const splitChunk = chunkString.split('\n');
+
+            // console.log("data: ", JSON.parse(splitChunk[1].substring(6)));
             const data = JSON.parse(splitChunk[1].substring(6)) as
               | ContentBlockStart
               | ContentBlockDelta;
@@ -186,8 +192,11 @@ export default class McpClient {
                 server.emit('assistant.thinking', delta.thinking);
               } else if (delta.type === 'text_delta') {
                 server.emit('assistant.response', delta.text);
+                response = response + delta.text;
               } else if (delta.type === 'signature_delta') {
                 server.emit('assistant.signature');
+                await this.ttsModel.synthesizeSpeech(response, server);
+                response = '';
               } else if (delta.type === 'input_json_delta') {
                 server.emit('assistant.tool', delta.partial_json);
                 toolInput = toolInput + delta.partial_json;

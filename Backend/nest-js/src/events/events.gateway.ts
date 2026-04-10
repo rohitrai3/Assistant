@@ -9,6 +9,7 @@ import { config } from 'dotenv';
 import { Server } from 'socket.io';
 import McpClient from 'src/providers/MCPClient';
 import SttModel from 'src/providers/STT';
+import TtsModel from 'src/providers/TTS';
 
 config();
 
@@ -24,9 +25,11 @@ export class EventsGateway {
 
   constructor(
     private sttModel: SttModel,
+    private ttsModel: TtsModel,
     private mcpClient: McpClient,
   ) {
     this.sttModel.load();
+    this.ttsModel.load();
     this.mcpClient.connectToServer(process.env.MCP_SERVER_PATH);
   }
 
@@ -42,5 +45,11 @@ export class EventsGateway {
 
     await this.mcpClient.processQuery(transcription, this.server);
     this.logger.log('LLM reply sent');
+  }
+
+  @SubscribeMessage('speech')
+  async speech(@MessageBody() data: string) {
+    await this.ttsModel.synthesizeSpeech(data, this.server);
+    this.logger.log('Speech synthesized');
   }
 }
