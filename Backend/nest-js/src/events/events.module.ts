@@ -6,4 +6,4 @@ import SttModel from 'src/providers/STT';
 @Module({
   providers: [EventsGateway, McpClient, SttModel],
 })
-export class EventsModule { }
+export class EventsModule {}

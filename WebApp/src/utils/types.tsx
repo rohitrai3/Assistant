@@ -1,24 +1,32 @@
-import type { Dispatch, SetStateAction } from "react";
-import type { Socket } from "socket.io-client";
-
-export type AudioInputProps = {
-  isConnected: boolean;
-  socket: Socket;
-}
-
-export type ConversationViewProps = {
-  messages: Message[];
-  setMessages: Dispatch<SetStateAction<Message[]>>;
-  socket: Socket;
-}
-
-export type MessageViewProps = {
+export type ContentBlockStart = {
+  type: "content_block_start";
   index: number;
-  message: Message;
+  contentBlock: ThinkingBlock | TextBlock;
 }
 
-export type Message = {
-  from: string;
-  content: string;
-};
+export type ContentBlockDelta = {
+  type: "content_block_delta";
+  index: number;
+  delta: ThinkingDelta | TextDelta;
+}
+
+export type TextDelta = {
+  type: "text_delta";
+  text: string;
+}
+
+export type TextBlock = {
+  type: "text";
+  text: string;
+}
+
+export type ThinkingDelta = {
+  type: "thinking_delta";
+  thinking: string;
+}
+
+export type ThinkingBlock = {
+  type: "thinking";
+  thinking: string;
+}
 

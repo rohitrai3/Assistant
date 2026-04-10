@@ -1,9 +1,15 @@
 import { useRef, useState } from "react";
 import { MicOff, MicOn } from "../utils/icons";
 import { read_audio } from "@huggingface/transformers";
-import type { AudioInputProps } from "../utils/types";
+import type { Socket } from "socket.io-client";
 
-export default function AudioInput({ isConnected, socket }: AudioInputProps) {
+type AudioInputProps = {
+  socket: Socket;
+}
+
+export default function AudioInput({
+  socket,
+}: AudioInputProps) {
   const [recording, setRecording] = useState<boolean>(false);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -25,6 +31,7 @@ export default function AudioInput({ isConnected, socket }: AudioInputProps) {
         chunksRef.current = [];
 
         const audioData = await read_audio(URL.createObjectURL(blob), 16000);
+
         socket.emit("conversation", audioData);
 
         streamRef.current?.getTracks().forEach(track => track.stop());
@@ -54,16 +61,12 @@ export default function AudioInput({ isConnected, socket }: AudioInputProps) {
   return (
     <div className="mb-4">
       <button
-        className={
-          `${isConnected ? "bg-gray cursor-pointer hover:bg-purple" : "bg-gray-dark"}
-          p-2 
-          rounded-full`}
-        disabled={!isConnected}
+        className="p-2 bg-gray cursor-pointer hover:bg-purplep-2 rounded-full"
         onClick={onClick}
       >
-        {recording ? MicOff() : MicOn(isConnected ? "fill-white" : "fill-gray")}
+        {recording ? MicOff() : MicOn()}
       </button>
-    </div>
+    </div >
   );
 }
 

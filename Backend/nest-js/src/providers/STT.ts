@@ -12,7 +12,7 @@ export default class SttModel {
   private transcriber: AutomaticSpeechRecognitionPipeline | void;
 
   constructor() {
-    this.logger.log("Initialize SttModel");
+    this.logger.log('Initialize SttModel');
 
     env.localModelPath = join(process.cwd(), 'src/assets/models/');
     env.allowRemoteModels = false;
@@ -20,19 +20,26 @@ export default class SttModel {
     env.useBrowserCache = false;
 
     if (env.backends.onnx.wasm) {
-      env.backends.onnx.wasm.wasmPaths = join(process.cwd(), 'src/assets/wasm/');
+      env.backends.onnx.wasm.wasmPaths = join(
+        process.cwd(),
+        'src/assets/wasm/',
+      );
     }
   }
 
   async load() {
     this.logger.log('Loading model...');
 
-    this.transcriber = await pipeline('automatic-speech-recognition', 'whisper-tiny-en', {
-      dtype: {
-        encoder_model: 'fp32',
-        decoder_model_merged: 'q4',
+    this.transcriber = await pipeline(
+      'automatic-speech-recognition',
+      'whisper-tiny-en',
+      {
+        dtype: {
+          encoder_model: 'fp32',
+          decoder_model_merged: 'q4',
+        },
       },
-    })
+    )
       .catch((err) => this.logger.error('Error loading model: ', err))
       .finally(() => this.logger.log('Model loaded'));
   }
@@ -49,6 +56,4 @@ export default class SttModel {
 
     return '';
   }
-
 }
-
