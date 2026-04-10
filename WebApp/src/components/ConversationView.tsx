@@ -3,6 +3,7 @@ import UserMessageView from "./UserMessageView";
 import AssistantThinkingView from "./AssistantThinkingView";
 import { useEffect, useRef, useState } from "react";
 import AssistantResponseView from "./AssistantResponseView";
+import AssistantToolView from "./AssistantToolView";
 
 type ConversationViewProps = {
   socket: Socket;
@@ -14,14 +15,21 @@ export default function ConversationView({
   const [userContents, setUserContents] = useState<string[]>([]);
   const [assistantThinkingContents, setAssistantThinkingContents] = useState<string[]>([]);
   const [assistantResponseContents, setAssistantResponseContents] = useState<string[]>([]);
+  const [assistantToolNameContents, setAssistantToolNameContents] = useState<string[]>([]);
+  const [assistantToolInputContents, setAssistantToolInputContents] = useState<string[]>([]);
   const [assistantThinking, setAssistantThinking] = useState<string>("");
   const [assistantResponse, setAssistantResponse] = useState<string>("");
+  const [assistantToolName, setAssistantToolName] = useState<string>("");
+  const [assistantToolInput, setAssistantToolInput] = useState<string>("");
   const bottomDivRef = useRef<HTMLDivElement | null>(null);
+
   if (bottomDivRef.current) bottomDivRef.current.scrollIntoView();
 
   useEffect(() => {
     let thinking = "";
     let response = "";
+    let toolName = "";
+    let toolInput = "{";
 
     socket.on("user.message", res => {
       setUserContents(prev => [...prev, res]);
@@ -49,7 +57,22 @@ export default function ConversationView({
 
     socket.on("assistant.signature", () => {
       setAssistantResponseContents(prev => [...prev, response]);
+      setAssistantToolNameContents(prev => [...prev, toolName]);
+      setAssistantToolInputContents(prev => [...prev, toolInput]);
       setAssistantResponse("");
+      setAssistantToolName("");
+      setAssistantToolInput("");
+    });
+
+    socket.on("assistant.tool.start", (res) => {
+      setAssistantToolName(res);
+      toolName = res;
+      toolInput = "{";
+    });
+
+    socket.on("assistant.tool", (res) => {
+      setAssistantToolInput(res);
+      toolInput = toolInput + res;
     });
 
     return () => {
@@ -59,6 +82,8 @@ export default function ConversationView({
       socket.off("assistant.response.start", () => console.log("Closing assistant response start event"));
       socket.off("assistant.response", () => console.log("Closing assistant response event"));
       socket.off("assistant.signature", () => console.log("Closing assistant signature event"));
+      socket.off("assistant.tool.start", () => console.log("Closing assistant tool start event"));
+      socket.off("assistant.tool", () => console.log("Closing assistant tool event"));
     };
   }, []);
 
@@ -67,10 +92,17 @@ export default function ConversationView({
       <div className="mt-auto" />
       {userContents.map((content, index) => <div key={index} className="flex flex-col gap-4">
         <UserMessageView content={content} />
-        {assistantThinkingContents[index] && <AssistantThinkingView content={assistantThinkingContents[index]} />}
-        {assistantResponseContents[index] && <AssistantResponseView content={assistantResponseContents[index]} />}
+        {assistantThinkingContents[index] &&
+          <AssistantThinkingView content={assistantThinkingContents[index]} />}
+        {assistantToolNameContents[index] &&
+          <AssistantToolView
+            name={assistantToolNameContents[index]}
+            input={assistantToolInputContents[index]} />}
+        {assistantResponseContents[index] &&
+          <AssistantResponseView content={assistantResponseContents[index]} />}
       </div>)}
       {assistantThinking && <AssistantThinkingView content={assistantThinking} />}
+      {assistantToolName && <AssistantToolView name={assistantToolName} input={assistantToolInput} />}
       {assistantResponse && <AssistantResponseView content={assistantResponse} />}
       <div ref={bottomDivRef} />
     </div>

@@ -2,7 +2,11 @@ import {
   MessageParam,
   Tool,
 } from '@anthropic-ai/sdk/resources/messages/messages.mjs';
-import { ContentBlockDelta, ContentBlockStart } from '../utils/types';
+import {
+  ContentBlockDelta,
+  ContentBlockStart,
+  McpResponse,
+} from '../utils/types';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { Injectable, Logger } from '@nestjs/common';
@@ -81,6 +85,7 @@ export default class McpClient {
       .catch((err) => this.logger.error('Error prompting LLM: ', err))
       .finally(() => this.logger.log('Prompt processing complete.'));
 
+    console.log('response: ', response);
     // Process response and handle tool calls
     const finalText: string[] = [];
 
@@ -137,17 +142,26 @@ export default class McpClient {
 
   private processStream(res: Response, server: Server) {
     const stream = res.body;
+    let toolName = '';
+    let toolInput = '{';
+
     if (stream) {
       const reader = stream.getReader();
 
       const readChunk = () => {
         reader
           .read()
-          .then(({ value, done }) => {
+          .then(async ({ value, done }) => {
             if (done) {
               console.log('Stream finished');
+
+              if (toolName) {
+                await this.callTool(toolName, toolInput, server);
+              }
+
               return;
             }
+
             const chunkString = new TextDecoder().decode(value);
             const splitChunk = chunkString.split('\n');
             const data = JSON.parse(splitChunk[1].substring(6)) as
@@ -161,6 +175,9 @@ export default class McpClient {
                 server.emit('assistant.thinking.start');
               } else if (contentBlock.type === 'text') {
                 server.emit('assistant.response.start');
+              } else if (contentBlock.type === 'tool_use') {
+                server.emit('assistant.tool.start', contentBlock.name);
+                toolName = contentBlock.name;
               }
             } else if (data.type === 'content_block_delta') {
               const delta = data.delta;
@@ -171,6 +188,9 @@ export default class McpClient {
                 server.emit('assistant.response', delta.text);
               } else if (delta.type === 'signature_delta') {
                 server.emit('assistant.signature');
+              } else if (delta.type === 'input_json_delta') {
+                server.emit('assistant.tool', delta.partial_json);
+                toolInput = toolInput + delta.partial_json;
               }
             }
 
@@ -181,5 +201,17 @@ export default class McpClient {
 
       readChunk();
     }
+  }
+
+  private async callTool(name: string, input: string, server: Server) {
+    const toolName = name;
+    const toolArgs = JSON.parse(input) as { [x: string]: unknown } | undefined;
+
+    const result = (await this.mcp.callTool({
+      name: toolName,
+      arguments: toolArgs,
+    })) as McpResponse;
+
+    server.emit('assistant.response', result.content[0].text);
   }
 }

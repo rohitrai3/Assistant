@@ -1,18 +1,28 @@
-export type ConversationRequest = {
-  id: string;
-  data: Float32Array;
+export type McpResponse = {
+  content: Text[];
 };
 
 export type ContentBlockStart = {
   type: 'content_block_start';
   index: number;
-  content_block: Thinking | Text;
+  content_block: Thinking | Text | ToolUse;
 };
 
 export type ContentBlockDelta = {
   type: 'content_block_delta';
   index: number;
-  delta: TextDelta | ThinkingDelta | SignatureDelta;
+  delta: TextDelta | ThinkingDelta | SignatureDelta | InputJsonDelta;
+};
+
+export type ToolUse = {
+  type: 'tool_use';
+  id: string;
+  name: string;
+};
+
+export type InputJsonDelta = {
+  type: 'input_json_delta';
+  partial_json: string;
 };
 
 export type SignatureDelta = {
@@ -38,9 +48,4 @@ export type Thinking = {
 export type ThinkingDelta = {
   type: 'thinking_delta';
   thinking: string;
-};
-
-export type Message = {
-  role: string;
-  content: string;
 };
