@@ -146,7 +146,7 @@ export default class McpClient {
   private processStream(res: Response, server: Server) {
     const stream = res.body;
     let toolName = '';
-    let toolInput = '{';
+    let toolInput = '';
     let response = '';
 
     if (stream) {
@@ -168,40 +168,43 @@ export default class McpClient {
 
             const chunkString = new TextDecoder().decode(value);
             const splitChunk = chunkString.split('\n');
+            splitChunk.map(async (chunk) => {
+              if (chunk.startsWith('data')) {
+                console.log('chunk:', chunk);
+                const data = JSON.parse(chunk.substring(6)) as
+                  | ContentBlockStart
+                  | ContentBlockDelta;
+                console.log('data:', data);
+                if (data.type === 'content_block_start') {
+                  const contentBlock = data.content_block;
 
-            // console.log("data: ", JSON.parse(splitChunk[1].substring(6)));
-            const data = JSON.parse(splitChunk[1].substring(6)) as
-              | ContentBlockStart
-              | ContentBlockDelta;
+                  if (contentBlock.type === 'thinking') {
+                    server.emit('assistant.thinking.start');
+                  } else if (contentBlock.type === 'text') {
+                    server.emit('assistant.response.start');
+                  } else if (contentBlock.type === 'tool_use') {
+                    server.emit('assistant.tool.start', contentBlock.name);
+                    toolName = contentBlock.name;
+                  }
+                } else if (data.type === 'content_block_delta') {
+                  const delta = data.delta;
 
-            if (data.type === 'content_block_start') {
-              const contentBlock = data.content_block;
-
-              if (contentBlock.type === 'thinking') {
-                server.emit('assistant.thinking.start');
-              } else if (contentBlock.type === 'text') {
-                server.emit('assistant.response.start');
-              } else if (contentBlock.type === 'tool_use') {
-                server.emit('assistant.tool.start', contentBlock.name);
-                toolName = contentBlock.name;
+                  if (delta.type === 'thinking_delta') {
+                    server.emit('assistant.thinking', delta.thinking);
+                  } else if (delta.type === 'text_delta') {
+                    server.emit('assistant.response', delta.text);
+                    response = response + delta.text;
+                  } else if (delta.type === 'signature_delta') {
+                    server.emit('assistant.signature');
+                    await this.ttsModel.synthesizeSpeech(response, server);
+                    response = '';
+                  } else if (delta.type === 'input_json_delta') {
+                    server.emit('assistant.tool', delta.partial_json);
+                    toolInput = toolInput + delta.partial_json;
+                  }
+                }
               }
-            } else if (data.type === 'content_block_delta') {
-              const delta = data.delta;
-
-              if (delta.type === 'thinking_delta') {
-                server.emit('assistant.thinking', delta.thinking);
-              } else if (delta.type === 'text_delta') {
-                server.emit('assistant.response', delta.text);
-                response = response + delta.text;
-              } else if (delta.type === 'signature_delta') {
-                server.emit('assistant.signature');
-                await this.ttsModel.synthesizeSpeech(response, server);
-                response = '';
-              } else if (delta.type === 'input_json_delta') {
-                server.emit('assistant.tool', delta.partial_json);
-                toolInput = toolInput + delta.partial_json;
-              }
-            }
+            });
 
             readChunk();
           })
@@ -213,8 +216,12 @@ export default class McpClient {
   }
 
   private async callTool(name: string, input: string, server: Server) {
+    this.logger.log('input: ', input);
     const toolName = name;
-    const toolArgs = JSON.parse(input) as { [x: string]: unknown } | undefined;
+    let toolArgs: { [x: string]: unknown } | undefined;
+    if (input) {
+      toolArgs = JSON.parse(input) as { [x: string]: unknown } | undefined;
+    }
 
     const result = (await this.mcp.callTool({
       name: toolName,
@@ -222,5 +229,6 @@ export default class McpClient {
     })) as McpResponse;
 
     server.emit('assistant.response', result.content[0].text);
+    await this.ttsModel.synthesizeSpeech(result.content[0].text, server);
   }
 }

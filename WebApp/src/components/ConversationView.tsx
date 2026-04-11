@@ -30,7 +30,7 @@ export default function ConversationView({
     let thinking = "";
     let response = "";
     let toolName = "";
-    let toolInput = "{";
+    let toolInput = "";
 
     socket.on("user.message", res => {
       setUserContents(prev => [...prev, res]);
@@ -68,7 +68,7 @@ export default function ConversationView({
     socket.on("assistant.tool.start", (res) => {
       setAssistantToolName(res);
       toolName = res;
-      toolInput = "{";
+      toolInput = "";
     });
 
     socket.on("assistant.tool", (res) => {
@@ -77,7 +77,6 @@ export default function ConversationView({
     });
 
     socket.on("speech", (res) => {
-      console.log("speech: ", res);
       const bufferData = new Uint8Array(res);
       const blob = new Blob([bufferData], { type: "audio/wav" });
       const objectURL = URL.createObjectURL(blob);

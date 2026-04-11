@@ -30,7 +30,7 @@ export class EventsGateway {
   ) {
     this.sttModel.load();
     this.ttsModel.load();
-    this.mcpClient.connectToServer(process.env.MCP_SERVER_PATH);
+    this.mcpClient.connectToServer(process.env.FINANCE_MCP_SERVER_PATH);
   }
 
   @SubscribeMessage('conversation')
